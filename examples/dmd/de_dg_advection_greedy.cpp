@@ -266,7 +266,7 @@ double t_final = 10.0;
 double dt = 0.01;
 double ef = 0.9999;
 bool visualization = false;
-bool visit = false;
+bool use_visit = false;
 bool paraview = false;
 bool adios2 = false;
 bool binary = false;
@@ -478,7 +478,7 @@ double simulation()
     // Create data collection for solution output: either VisItDataCollection for
     // ascii data files, or SidreDataCollection for binary data files.
     DataCollection *dc = NULL;
-    if (visit)
+    if (use_visit)
     {
         if (binary)
         {
@@ -791,7 +791,7 @@ double simulation()
                 sout << "solution\n" << pmesh << u_gf << flush;
             }
 
-            if (visit)
+            if (use_visit)
             {
                 dc->SetCycle(ti);
                 dc->SetTime(t);
@@ -946,15 +946,11 @@ double simulation()
         VisItDataCollection dmd_visit_dc("DMD_DG_Advection_Greedy_" +
                                          to_string(f_factor), &pmesh);
         dmd_visit_dc.RegisterField("temperature", &u_gf);
-        if (visit)
+        if (use_visit)
         {
             dmd_visit_dc.SetCycle(0);
             dmd_visit_dc.SetTime(0.0);
             dmd_visit_dc.Save();
-        }
-
-        if (visit)
-        {
             for (int i = 1; i < ts.size(); i++)
             {
                 if (i == ts.size() - 1 || (i % vis_steps) == 0)
@@ -1148,7 +1144,7 @@ int main(int argc, char *argv[])
     args.AddOption(&visualization, "-vis", "--visualization", "-no-vis",
                    "--no-visualization",
                    "Enable or disable GLVis visualization.");
-    args.AddOption(&visit, "-visit", "--visit-datafiles", "-no-visit",
+    args.AddOption(&use_visit, "-visit", "--visit-datafiles", "-no-visit",
                    "--no-visit-datafiles",
                    "Save data files for VisIt (visit.llnl.gov) visualization.");
     args.AddOption(&paraview, "-paraview", "--paraview-datafiles", "-no-paraview",
@@ -1271,7 +1267,7 @@ int main(int argc, char *argv[])
     else if (build_database)
     {
         MFEM_VERIFY(rdim != -1, "rdim must be set.");
-        MFEM_VERIFY(!visit
+        MFEM_VERIFY(!use_visit
                     && !visualization,
                     "visit and visualization must be turned off during the build_database phase.")
         std::ifstream infile(io_dir+"/dg_advection_greedy_parametric_data");

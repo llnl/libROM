@@ -154,7 +154,7 @@ double greedy_relative_diff_tol = 0.01;
 int greedy_subset_size = 2;
 int greedy_convergence_subset_size = 3;
 bool visualization = false;
-bool visit = false;
+bool use_visit = false;
 int vis_steps = 5;
 bool adios2 = false;
 const char *baseoutputname = "";
@@ -306,7 +306,7 @@ double simulation()
                                  to_string(radius) + "_" + to_string(alpha) + "_" + to_string(cx) + "_" +
                                  to_string(cy), pmesh);
     visit_dc.RegisterField("temperature", &u_gf);
-    if (!de && !online && visit)
+    if (!de && !online && use_visit)
     {
         visit_dc.SetCycle(0);
         visit_dc.SetTime(0.0);
@@ -522,7 +522,7 @@ double simulation()
                     sout << "solution\n" << *pmesh << u_gf << flush;
                 }
 
-                if (!de && !online && visit)
+                if (!de && !online && use_visit)
                 {
                     visit_dc.SetCycle(ti);
                     visit_dc.SetTime(t);
@@ -732,15 +732,11 @@ double simulation()
                                          to_string(radius) + "_" + to_string(alpha) + "_" +
                                          to_string(cx) + "_" + to_string(cy), pmesh);
         dmd_visit_dc.RegisterField("temperature", &u_gf);
-        if (visit)
+        if (use_visit)
         {
             dmd_visit_dc.SetCycle(0);
             dmd_visit_dc.SetTime(0.0);
             dmd_visit_dc.Save();
-        }
-
-        if (visit)
-        {
             for (int i = 1; i < ts.size(); i++)
             {
                 if (i == ts.size() - 1 || (i % vis_steps) == 0)
@@ -1017,7 +1013,7 @@ int main(int argc, char *argv[])
     args.AddOption(&visualization, "-vis", "--visualization", "-no-vis",
                    "--no-visualization",
                    "Enable or disable GLVis visualization.");
-    args.AddOption(&visit, "-visit", "--visit-datafiles", "-no-visit",
+    args.AddOption(&use_visit, "-visit", "--visit-datafiles", "-no-visit",
                    "--no-visit-datafiles",
                    "Save data files for VisIt (visit.llnl.gov) visualization.");
     args.AddOption(&vis_steps, "-vs", "--visualization-steps",
@@ -1054,7 +1050,7 @@ int main(int argc, char *argv[])
     if (build_database)
     {
         MFEM_VERIFY(rdim != -1, "rdim must be set.");
-        MFEM_VERIFY(!visit
+        MFEM_VERIFY(!use_visit
                     && !visualization,
                     "visit and visualization must be turned off during the build_database phase.")
         std::ifstream infile("de_parametric_heat_conduction_greedy_data");

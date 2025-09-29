@@ -51,6 +51,10 @@ endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} ${LIBROM_FLAGS}" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} ${LIBROM_FLAGS}" CACHE STRING "" FORCE)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if (CMAKE_HOST_APPLE)
     # Fix linker flags for OSX to use classic linker on XCode 15.0+:
     # https://developer.apple.com/documentation/xcode-release-notes/xcode-15-release-notes#Linking
