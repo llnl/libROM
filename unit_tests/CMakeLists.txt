@@ -22,12 +22,12 @@ set(unit_test_names
 foreach(name IN LISTS unit_test_names)
     add_executable(${name} ${name}.cpp)
     target_link_libraries(${name} PRIVATE
-                          ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C
+                          ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} MPI::MPI_C MPI::MPI_CXX
                           ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES}
                           MPI::MPI_Fortran)
     target_include_directories(${name} PRIVATE
-                               ${CMAKE_CURRENT_SOURCE_DIR} ${MPI_C_INCLUDE_DIRS})
-    target_compile_features(${name} PRIVATE cxx_std_11)
+                               ${CMAKE_CURRENT_SOURCE_DIR} ${MPI_C_INCLUDE_DIRS} ${MPI_CXX_INCLUDE_DIRS})
+    target_compile_features(${name} PRIVATE cxx_std_17)
 endforeach(name)
 
 set(unit_test_stems
@@ -53,12 +53,12 @@ set(unit_test_stems
 foreach(stem IN LISTS unit_test_stems)
     add_executable(test_${stem} test_${stem}.cpp)
     target_link_libraries(test_${stem} PRIVATE
-                          ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C
+                          ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} MPI::MPI_C MPI::MPI_CXX
                           ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES}
                           MPI::MPI_Fortran GTest::GTest)
     target_include_directories(test_${stem} PRIVATE
-                               ${CMAKE_CURRENT_SOURCE_DIR} ${MPI_C_INCLUDE_DIRS})
-    target_compile_features(test_${stem} PRIVATE cxx_std_11)
+                               ${CMAKE_CURRENT_SOURCE_DIR} ${MPI_C_INCLUDE_DIRS} ${MPI_CXX_INCLUDE_DIRS})
+    target_compile_features(test_${stem} PRIVATE cxx_std_17)
     target_compile_definitions(test_${stem} PRIVATE CAROM_HAS_GTEST)
 
     add_test(NAME test_${stem} COMMAND test_${stem})

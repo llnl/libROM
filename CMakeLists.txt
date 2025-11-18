@@ -125,9 +125,9 @@ endif()
 
 add_subdirectory(lib)
 
-# Use the C++11 standard as an entire feature instead of
+# Use the C++17 standard as an entire feature instead of
 # enumerating individual compiler features for simplicity
-target_compile_features(ROM PRIVATE cxx_std_11)
+target_compile_features(ROM PRIVATE cxx_std_17)
 
 if (ENABLE_EXAMPLES)
   if (USE_MFEM)
@@ -194,11 +194,12 @@ if (ENABLE_EXAMPLES)
       add_executable(${name} examples/${example_dir}/${name}.cpp)
 
       target_link_libraries(${name}
-        PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
+        PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} MPI::MPI_C MPI::MPI_CXX ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
       target_include_directories(${name}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-        ${MPI_C_INCLUDE_DIRS})
-      target_compile_features(${name} PRIVATE cxx_std_11)
+        ${MPI_C_INCLUDE_DIRS}
+        ${MPI_CXX_INCLUDE_DIRS})
+      target_compile_features(${name} PRIVATE cxx_std_17)
     endforeach() # IN LISTS examples
     file(COPY examples/data DESTINATION ${CMAKE_BINARY_DIR}/examples)
     file(COPY examples/merlin DESTINATION ${CMAKE_BINARY_DIR}/examples)
@@ -215,11 +216,12 @@ if (ENABLE_EXAMPLES)
     add_executable(${name} examples/misc/${name}.cpp)
 
     target_link_libraries(${name}
-      PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
+      PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} MPI::MPI_C MPI::MPI_CXX ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
     target_include_directories(${name}
       PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-      ${MPI_C_INCLUDE_DIRS})
-    target_compile_features(${name} PRIVATE cxx_std_11)
+      ${MPI_C_INCLUDE_DIRS}
+      ${MPI_CXX_INCLUDE_DIRS})
+    target_compile_features(${name} PRIVATE cxx_std_17)
   endforeach(name) # IN LISTS misc_exmaple_names
 
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests)
@@ -235,11 +237,12 @@ if (ENABLE_EXAMPLES)
     foreach(name IN LISTS regression_test_names)
       add_executable(${name} regression_tests/${name}.cpp)
       target_link_libraries(${name}
-        PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
+        PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} MPI::MPI_C MPI::MPI_CXX ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
       target_include_directories(${name}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-        ${MPI_C_INCLUDE_DIRS})
-      target_compile_features(${name} PRIVATE cxx_std_11)
+        ${MPI_C_INCLUDE_DIRS}
+        ${MPI_CXX_INCLUDE_DIRS})
+      target_compile_features(${name} PRIVATE cxx_std_17)
     endforeach(name) # IN LISTS regression_test_names
   endif()
 endif(ENABLE_EXAMPLES)
