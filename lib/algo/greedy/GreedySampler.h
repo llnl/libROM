@@ -254,7 +254,7 @@ public:
     /**
      * @brief Destructor.
      */
-    ~GreedySampler();
+    virtual ~GreedySampler();
 
     /**
      * @brief Returns the next parameter point for which sampling is required.
