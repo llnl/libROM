@@ -507,7 +507,8 @@ Vector::gather()
                                 MPI_COMM_WORLD) == MPI_SUCCESS);
 
     delete [] d_vec;
-    delete [] data_offsets, data_cnts;
+    delete [] data_offsets;
+    delete [] data_cnts;
     d_vec = d_new_vec;
     d_alloc_size = new_size;
     d_dim = new_size;

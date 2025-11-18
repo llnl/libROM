@@ -77,7 +77,7 @@ public:
      * @return True if the file close was successful.
      */
     bool
-    close();
+    close() override;
 
     /**
      * @brief Writes an array of integers associated with the supplied filename.

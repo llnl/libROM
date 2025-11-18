@@ -97,7 +97,7 @@ private:
     addLinearlyDependentSample(
         const Matrix & A,
         const Matrix & W,
-        const Matrix & sigma);
+        const Matrix & sigma) override;
 
     /**
      * @brief Add a new, unique sample to the SVD.
@@ -112,7 +112,7 @@ private:
         const Vector & j,
         const Matrix & A,
         const Matrix & W,
-        const Matrix & sigma);
+        const Matrix & sigma) override;
 };
 
 }
