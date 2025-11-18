@@ -816,7 +816,8 @@ Matrix::gather()
                                 MPI_COMM_WORLD) == MPI_SUCCESS);
 
     delete [] d_mat;
-    delete [] data_offsets, data_cnts;
+    delete [] data_offsets;
+    delete [] data_cnts;
     d_mat = d_new_mat;
     d_alloc_size = new_size;
 
