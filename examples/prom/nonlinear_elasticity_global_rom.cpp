@@ -591,8 +591,19 @@ int main(int argc, char *argv[])
     //    discontinuous higher-order space. Since x and v are integrated in time
     //    as a system, we group them together in block vector vx, on the unique
     //    parallel degrees of freedom, with offsets given by array true_offset.
-    H1_FECollection fe_coll(order, dim);
-    ParFiniteElementSpace fespace(pmesh, &fe_coll, dim);
+    FiniteElementCollection *fe_coll;
+    NURBSExtension *NURBSext = NULL;
+
+    if (pmesh->NURBSext)
+    {
+       fe_coll = new NURBSFECollection(order);
+       NURBSext = new NURBSExtension(pmesh->NURBSext, order);
+    }
+    else
+    {
+       fe_coll = new H1_FECollection(order, dim);
+    }
+    ParFiniteElementSpace fespace(pmesh, NURBSext, fe_coll, dim);
 
     HYPRE_BigInt glob_size = fespace.GlobalTrueVSize();
     if (myid == 0)
@@ -614,8 +625,19 @@ int main(int argc, char *argv[])
     ParGridFunction x_ref(&fespace);
     pmesh->GetNodes(x_ref);
 
-    L2_FECollection w_fec(order + 1, dim);
-    ParFiniteElementSpace w_fespace(pmesh, &w_fec);
+    FiniteElementCollection *w_fec;
+    NURBSExtension *w_NURBSext = NULL;
+    if (pmesh->NURBSext)
+    {
+       w_fec = new NURBSFECollection(order + 1);
+       w_NURBSext = new NURBSExtension(pmesh->NURBSext, order+1);
+    }
+    else
+    {
+       w_fec = new L2_FECollection(order + 1, dim);
+    }
+
+    ParFiniteElementSpace w_fespace(pmesh, w_NURBSext, w_fec);
     ParGridFunction w_gf(&w_fespace);
 
     // Basis params
@@ -1393,6 +1415,8 @@ int main(int argc, char *argv[])
     delete eqpSol_S;
     delete window_ids;
     delete load_eqpsol;
+    delete w_fec;
+    delete fe_coll;
 
     totalTimer.Stop();
     if (myid == 0)

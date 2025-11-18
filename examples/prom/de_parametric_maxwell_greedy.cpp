@@ -388,7 +388,7 @@ double simulation()
 
     // 27. Save data in the VisIt format.
     DataCollection *dc = NULL;
-    if (visit)
+    if (::visit)
     {
         if (offline) dc = new VisItDataCollection("de_maxwell_local", pmesh);
         else if (fom) dc = new VisItDataCollection("de_maxwell_local_fom", pmesh);
@@ -647,7 +647,7 @@ int main(int argc, char *argv[])
                    "--no-partial-assembly", "Enable Partial Assembly.");
     args.AddOption(&device_config, "-d", "--device",
                    "Device configuration string, see Device::Configure().");
-    args.AddOption(&visit, "-visit", "--visit-datafiles", "-no-visit",
+    args.AddOption(&::visit, "-visit", "--visit-datafiles", "-no-visit",
                    "--no-visit-datafiles",
                    "Save data files for VisIt (visit.llnl.gov) visualization.");
     args.AddOption(&visualization, "-vis", "--visualization", "-no-vis",
@@ -738,7 +738,7 @@ int main(int argc, char *argv[])
         MFEM_VERIFY(!offline
                     && !online,
                     "offline and online must be turned off during the build_database phase.");
-        MFEM_VERIFY(!visit
+        MFEM_VERIFY(!::visit
                     && !visualization,
                     "visit and visualization must be turned off during the build_database phase.")
         std::ifstream infile("de_parametric_maxwell_greedy_algorithm_data");

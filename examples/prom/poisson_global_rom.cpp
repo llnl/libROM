@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
     // 2. Parse command-line options.
-    const char *mesh_file = "../data/star.mesh";
+    const char *mesh_file = "../data/square-nurbs.mesh";
     int order = 1;
     bool static_cond = false;
     bool pa = false;
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     {
         int ref_levels =
             (int)floor(log(10000./mesh.GetNE())/log(2.)/dim);
-        for (int l = 0; l < ref_levels; l++)
+        for (int l = 0; l < ref_levels+2; l++)
         {
             mesh.UniformRefinement();
         }
@@ -172,20 +172,26 @@ int main(int argc, char *argv[])
     //    parallel mesh is defined, the serial mesh can be deleted.
     ParMesh pmesh(MPI_COMM_WORLD, mesh);
     mesh.Clear();
-    {
+   /* {
         int par_ref_levels = 2;
         for (int l = 0; l < par_ref_levels; l++)
         {
             pmesh.UniformRefinement();
         }
-    }
+    }*/
 
     // 7. Define a parallel finite element space on the parallel mesh. Here we
     //    use continuous Lagrange finite elements of the specified order. If
     //    order < 1, we instead use an isoparametric/isogeometric space.
     FiniteElementCollection *fec;
+    NURBSExtension *NURBSext = NULL;
     bool delete_fec;
-    if (order > 0)
+    if (pmesh.NURBSext)
+    {
+      fec = new NURBSFECollection(order);
+      NURBSext = new NURBSExtension(pmesh.NURBSext, order);
+    }
+    else if (order > 0)
     {
         fec = new H1_FECollection(order, dim);
         delete_fec = true;
@@ -204,7 +210,7 @@ int main(int argc, char *argv[])
         fec = new H1_FECollection(order = 1, dim);
         delete_fec = true;
     }
-    ParFiniteElementSpace fespace(&pmesh, fec);
+    ParFiniteElementSpace fespace(&pmesh, NURBSext, fec);
     HYPRE_Int size = fespace.GlobalTrueVSize();
     if (myid == 0)
     {

@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     //    handle triangular, quadrilateral, tetrahedral and hexahedral meshes
     //    with the same code.
     Mesh *mesh;
-    if (mesh_file == "")
+    if (strcmp(mesh_file, "") == 0 )
     {
         mesh = new Mesh(Mesh::MakeCartesian2D(2, 2, Element::QUADRILATERAL));
     }
