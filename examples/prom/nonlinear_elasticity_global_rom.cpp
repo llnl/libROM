@@ -910,7 +910,7 @@ int main(int argc, char *argv[])
         }
 
         if (use_eqp)
-        {
+        {std::cout<<911<<std::endl;
             // EQP setup
             eqpSol = new CAROM::Vector(ir0->GetNPoints() * fespace.GetNE(), true);
             SetupEQP_snapshots(ir0, myid, &fespace, nsets, BV_librom.get(),
@@ -965,10 +965,10 @@ int main(int argc, char *argv[])
                                          num_sample_dofs_per_proc);
             smm->RegisterSampledVariable("H", 0, sample_dofs,
                                          num_sample_dofs_per_proc);
-
+std::cout<<968<<std::endl;
             smm->ConstructSampleMesh();
         }
-
+std::cout<<971<<std::endl;
         w = new CAROM::Vector(rxdim + rvdim, false);
         w_v = new CAROM::Vector(rvdim, false);
         w_x = new CAROM::Vector(rxdim, false);
@@ -1086,20 +1086,20 @@ int main(int argc, char *argv[])
                 }
             }
         }
-
+std::cout<<1089<<std::endl;
         if (myid == 0)
         {
             if (!use_eqp)
-            {
+            {std::cout<<1093<<std::endl;
                 // Define operator in sample space
                 soper = new HyperelasticOperator(*sp_XV_space, ess_tdof_list_sp, visc, mu, K);
             }
             else
-            {
+            {std::cout<<1098<<std::endl;
                 soper = new HyperelasticOperator(fespace, ess_tdof_list, visc, mu, K);
             }
         }
-
+std::cout<<1102<<std::endl;
         if (!use_eqp)
         {
             romop = new RomOperator(&oper, soper, rvdim, rxdim, hdim, smm, w_v0, w_x0,
@@ -1114,7 +1114,7 @@ int main(int argc, char *argv[])
                                     myid,
                                     num_samples_req != -1, hyperreduce, x_base_only, use_eqp, eqpSol, ir0, model);
         }
-
+std::cout<<1117<<std::endl;
         // Print lifted initial energies
         BroadcastUndistributedRomVector(w);
 
@@ -1141,7 +1141,7 @@ int main(int argc, char *argv[])
             cout << "Lifted initial energies, EE = " << ee
                  << ", KE = " << ke << ", ΔTE = " << (ee + ke) - (ee0 + ke0) << endl;
         }
-
+std::cout<<1144<<std::endl;
         ode_solver->Init(*romop);
     }
     else
@@ -1475,14 +1475,14 @@ HyperelasticOperator::HyperelasticOperator(ParFiniteElementSpace &f,
     const double ref_density = 1.0; // density in the reference configuration
     ConstantCoefficient rho0(ref_density);
 
-    M = new ParBilinearForm(&fespace);
-    M->AddDomainIntegrator(new VectorMassIntegrator(rho0));
-    M->Assemble(skip_zero_entries);
-    M->Finalize(skip_zero_entries);
-    Mmat = M->ParallelAssemble();
+    M = new ParBilinearForm(&fespace);std::cout<<1478<<std::endl;
+    M->AddDomainIntegrator(new VectorMassIntegrator(rho0));std::cout<<1479<<std::endl;
+    M->Assemble(skip_zero_entries);std::cout<<1480<<std::endl;
+    M->Finalize(skip_zero_entries);std::cout<<1481<<std::endl;
+    Mmat = M->ParallelAssemble();std::cout<<1482<<std::endl;
     HypreParMatrix *Me = Mmat->EliminateRowsCols(ess_tdof_list);
     delete Me;
-
+std::cout<<1485<<std::endl;
     M_solver.iterative_mode = false;
     M_solver.SetRelTol(rel_tol);
     M_solver.SetAbsTol(0.0);
@@ -1502,7 +1502,7 @@ HyperelasticOperator::HyperelasticOperator(ParFiniteElementSpace &f,
     S->AddDomainIntegrator(new VectorDiffusionIntegrator(visc_coeff));
     S->Assemble(skip_zero_entries);
     S->Finalize(skip_zero_entries);
-    S->FormSystemMatrix(ess_tdof_list, Smat);
+    S->FormSystemMatrix(ess_tdof_list, Smat);std::cout<<1505<<std::endl;
 }
 
 void HyperelasticOperator::Mult(const Vector &vx, Vector &dvx_dt) const
