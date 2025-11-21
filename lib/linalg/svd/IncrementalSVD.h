@@ -62,7 +62,7 @@ public:
     bool
     takeSample(
         double* u_in,
-        bool add_without_increase = false)override;
+        bool add_without_increase = false) override;
 
     /**
      * @brief Returns the basis vectors for the current time interval as a

@@ -125,7 +125,7 @@ public:
         const std::string& key,
         const double* const data,
         int nelements,
-        const bool distributed=false)override;
+        const bool distributed=false) override;
 
     /**
      * @brief Writes a vector of doubles associated with the supplied key to
@@ -149,7 +149,7 @@ public:
         const std::string& key,
         const std::vector<double>& data,
         int nelements,
-        const bool distributed=false)override;
+        const bool distributed=false) override;
 
     /**
      * @brief Reads an array of integers associated with the supplied key
@@ -172,7 +172,7 @@ public:
         const std::string& key,
         int* data,
         int nelements,
-        const bool distributed=false)override;
+        const bool distributed=false) override;
 
     /**
      * @brief Count the number of elements in an array of doubles associated
@@ -184,7 +184,7 @@ public:
      */
     virtual
     int
-    getDoubleArraySize(const std::string& key)override;
+    getDoubleArraySize(const std::string& key) override;
 
     /**
      * @brief Reads an array of doubles associated with the supplied key
@@ -207,7 +207,7 @@ public:
         const std::string& key,
         double* data,
         int nelements,
-        const bool distributed=false)override;
+        const bool distributed=false) override;
 
     /**
      * @brief Reads a sub-array of doubles associated with the supplied key
@@ -232,7 +232,7 @@ public:
         double* data,
         int nelements,
         const std::vector<int>& idx,
-        const bool distributed=false)override;
+        const bool distributed=false) override;
 
     /**
      * @brief Reads an array of doubles associated with the supplied key
@@ -264,7 +264,7 @@ public:
         int offset,
         int block_size,
         int stride,
-        const bool distributed=false)override;
+        const bool distributed=false) override;
 
 protected:
 
