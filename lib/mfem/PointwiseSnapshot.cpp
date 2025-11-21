@@ -1,6 +1,8 @@
 #include "PointwiseSnapshot.hpp"
 
 #ifdef MFEM_USE_GSLIB
+using std::cout;
+using std::endl;
 namespace CAROM {
 
 PointwiseSnapshot::PointwiseSnapshot(const int sdim, const int *dims_)
