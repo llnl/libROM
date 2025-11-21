@@ -15,7 +15,6 @@
 #include "linalg/Matrix.h"
 
 using namespace mfem;
-using namespace std;
 
 namespace CAROM {
 

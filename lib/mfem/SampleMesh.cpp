@@ -10,6 +10,14 @@
 
 #include "SampleMesh.hpp"
 
+using std::vector;
+using std::set;
+using std::map;
+using std::make_pair;
+using std::string;
+using std::cout;
+using std::endl;
+
 namespace CAROM {
 
 #define FULL_DOF_STENCIL
@@ -899,7 +907,7 @@ void ParaViewPrintAttributes(const string &fname,
                              const Array<int> *el_number=nullptr,
                              const Array<int> *vert_number=nullptr)
 {
-    ofstream out(fname + ".vtu");
+    std::ofstream out(fname + ".vtu");
 
     out << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\"";
     out << " byte_order=\"" << VTKByteOrder() << "\">\n";
@@ -1221,8 +1229,8 @@ void SampleMeshManager::ConstructSampleMesh()
         spaceTOS[i+1] = spaceTOS[i] + fespace[i]->GetTrueVSize();
     }
 
-    SetSampleMaps();
-    CreateSampleMesh();
+    SetSampleMaps();std::cout<<1224 <<std::endl;
+    CreateSampleMesh();std::cout<<1225 <<std::endl;
 
     if (myid == 0)
     {
@@ -1317,7 +1325,7 @@ void SampleMeshManager::WriteVariableSampleMap(const string variable,
         string file_name) const
 {
     const int var = GetVariableIndex(variable);
-    ofstream file;
+    std::ofstream file;
     file.open(file_name);
     for (int i=0; i<s2sp_var[var].size(); ++i)
     {
@@ -1577,20 +1585,23 @@ void SampleMeshManager::CreateSampleMesh()
     Mesh *sample_mesh = 0;
     BuildSampleMesh(*pmesh, fespace, elems, sample_mesh, sprows, elemLocalIndices,
                     elemLocalIndicesInverse);
-
+std::cout<<1580 <<std::endl;
     MFEM_VERIFY(sample_mesh->GetNE() == elemLocalIndices.size(), "");
 
     if (myid == 0)
     {
         sample_pmesh = new ParMesh(root_comm, *sample_mesh);
         delete sample_mesh;
-
+        for (int i=0; i<nspaces; ++i)
+           std::cout<<fespace[i]->GetNURBSext()<<std::endl;
         // Create fespaces on sample mesh
         for (int i=0; i<nspaces; ++i)
-            spfespace[i] = new ParFiniteElementSpace(sample_pmesh, fespace[i]->FEColl(),
+            spfespace[i] = new ParFiniteElementSpace(sample_pmesh,
+                    fespace[i]->GetNURBSext(),
+                    fespace[i]->FEColl(),
                     fespace[i]->GetVDim());
     }
-
+std::cout<<1593 <<std::endl;
     vector<int> spNtrue(nspaces);
     for (int i=0; i<nspaces; ++i)
         spNtrue[i] = myid == 0 ? spfespace[i]->TrueVSize() : 0;
@@ -1604,7 +1615,7 @@ void SampleMeshManager::CreateSampleMesh()
     Finish_s2sp_augmented(myid, nprocs, fespace, sample_dofs_block,
                           sample_dofs_sub_to_sample_dofs, local_num_sample_dofs_sub, true, s2sp);
 #endif
-
+std::cout<<1607 <<std::endl;
     // Prepare for setting st2sp
 
     const int numStencil = sprows.size();
@@ -1785,7 +1796,7 @@ void SampleDOFSelector::ReadMapFromFile(const string variable, string file_name)
     vmap[variable] = nvar;
 
     vector<int> v;
-    ifstream file;
+    std::ifstream file;
     file.open(file_name);
     string line;
     while(getline(file, line)) {

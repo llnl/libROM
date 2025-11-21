@@ -14,7 +14,6 @@
 #include "mfem.hpp"
 
 using namespace mfem;
-using namespace std;
 #ifdef MFEM_USE_GSLIB
 
 namespace CAROM {

@@ -20,7 +20,10 @@
 #include "linalg/Matrix.h"
 
 using namespace mfem;
-using namespace std;
+using std::vector;
+using std::set;
+using std::map;
+using std::string;
 
 namespace CAROM {
 
