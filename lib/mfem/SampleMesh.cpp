@@ -10,12 +10,7 @@
 
 #include "SampleMesh.hpp"
 
-using std::vector;
-using std::set;
-using std::map;
 using std::make_pair;
-using std::string;
-using std::cout;
 using std::endl;
 
 namespace CAROM {
@@ -1229,8 +1224,8 @@ void SampleMeshManager::ConstructSampleMesh()
         spaceTOS[i+1] = spaceTOS[i] + fespace[i]->GetTrueVSize();
     }
 
-    SetSampleMaps();std::cout<<1224 <<std::endl;
-    CreateSampleMesh();std::cout<<1225 <<std::endl;
+    SetSampleMaps();
+    CreateSampleMesh();
 
     if (myid == 0)
     {
@@ -1585,7 +1580,7 @@ void SampleMeshManager::CreateSampleMesh()
     Mesh *sample_mesh = 0;
     BuildSampleMesh(*pmesh, fespace, elems, sample_mesh, sprows, elemLocalIndices,
                     elemLocalIndicesInverse);
-std::cout<<1580 <<std::endl;
+
     MFEM_VERIFY(sample_mesh->GetNE() == elemLocalIndices.size(), "");
 
     if (myid == 0)
@@ -1593,7 +1588,7 @@ std::cout<<1580 <<std::endl;
         sample_pmesh = new ParMesh(root_comm, *sample_mesh);
         delete sample_mesh;
         for (int i=0; i<nspaces; ++i)
-           std::cout<<fespace[i]->GetNURBSext()<<std::endl;
+
         // Create fespaces on sample mesh
         for (int i=0; i<nspaces; ++i)
             spfespace[i] = new ParFiniteElementSpace(sample_pmesh,
@@ -1601,7 +1596,7 @@ std::cout<<1580 <<std::endl;
                     fespace[i]->FEColl(),
                     fespace[i]->GetVDim());
     }
-std::cout<<1593 <<std::endl;
+
     vector<int> spNtrue(nspaces);
     for (int i=0; i<nspaces; ++i)
         spNtrue[i] = myid == 0 ? spfespace[i]->TrueVSize() : 0;
@@ -1615,7 +1610,7 @@ std::cout<<1593 <<std::endl;
     Finish_s2sp_augmented(myid, nprocs, fespace, sample_dofs_block,
                           sample_dofs_sub_to_sample_dofs, local_num_sample_dofs_sub, true, s2sp);
 #endif
-std::cout<<1607 <<std::endl;
+
     // Prepare for setting st2sp
 
     const int numStencil = sprows.size();
