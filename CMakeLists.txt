@@ -110,133 +110,26 @@ set(CAROM_HAVE_LAPACK ${LAPACK_FOUND})
 set(CAROM_HAVE_HDF5 ${HDF5_FOUND})
 
 if (USE_MFEM)
-    find_library(MFEM mfem "${CMAKE_SOURCE_DIR}/dependencies/mfem" "${MFEM_DIR}/lib")
-    find_library(HYPRE HYPRE "${CMAKE_SOURCE_DIR}/dependencies/hypre/src/hypre/lib" "${HYPRE_DIR}/lib")
-    find_library(PARMETIS parmetis "${CMAKE_SOURCE_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis" "${PARMETIS_DIR}/lib")
-    find_library(METIS metis "${CMAKE_SOURCE_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis" "${METIS_DIR}/lib")
-    find_path(MFEM_INCLUDES mfem.hpp "${CMAKE_SOURCE_DIR}/dependencies/mfem" "${MFEM_DIR}/include")
-    find_path(HYPRE_INCLUDES HYPRE.h "${CMAKE_SOURCE_DIR}/dependencies/hypre/src/hypre/include" "${HYPRE_DIR}/include")
-    find_path(PARMETIS_INCLUDES metis.h "${CMAKE_SOURCE_DIR}/dependencies/parmetis-4.0.3/metis/include" "${PARMETIS_DIR}/metis/include")
+    find_package(mfem REQUIRED NAMES MFEM HINTS "${MFEM_DIR}"
+                  "${MFEM_DIR}/lib/cmake/mfem" NO_DEFAULT_PATH)
+    message(STATUS "Found mfem config in: ${mfem_DIR} (version ${MFEM_VERSION})")
 endif()
+
+set(CAROM_LIBS ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
+set(CAROM_INCS ${CMAKE_CURRENT_SOURCE_DIR} ${MPI_C_INCLUDE_DIRS})
 
 add_subdirectory(lib)
 
-# Use the C++11 standard as an entire feature instead of
-# enumerating individual compiler features for simplicity
-target_compile_features(ROM PRIVATE cxx_std_11)
-
 if (ENABLE_EXAMPLES)
+  add_subdirectory(examples/misc)
   if (USE_MFEM)
-    set(examples
-      poisson_global_rom
-      poisson_local_rom_greedy
-      dg_advection_global_rom
-      dg_advection_local_rom_matrix_interp
-      mixed_nonlinear_diffusion
-      nonlinear_elasticity_global_rom
-      linear_elasticity_global_rom
-      maxwell_global_rom
-      de_parametric_maxwell_greedy
-      maxwell_local_rom_greedy     
-      grad_div_global_rom
-      elliptic_eigenproblem_global_rom
-      dg_advection
-      nonlinear_elasticity
-      heat_conduction
-      heat_conduction_dmdc
-      parametric_heat_conduction
-      de_parametric_heat_conduction_greedy
-      de_dg_advection_greedy
-      wave_equation
-      dg_euler
-      local_dw_csv
-      parametric_tw_csv
-      parametric_dw_csv
-      parametric_dmdc_heat_conduction)
-    set(example_directories
-      prom
-      prom
-      prom
-      prom
-      prom
-      prom
-      prom
-      prom
-      prom
-      prom
-      prom
-      prom
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd
-      dmd)
-
-    list(LENGTH examples len1)
-    math(EXPR len2 "${len1} - 1")
-
-    foreach(val RANGE ${len2})
-      list(GET examples ${val} name)
-      list(GET example_directories ${val} example_dir)
-      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/examples/${example_dir})
-      add_executable(${name} examples/${example_dir}/${name}.cpp)
-
-      target_link_libraries(${name}
-        PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
-      target_include_directories(${name}
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-        ${MPI_C_INCLUDE_DIRS})
-      target_compile_features(${name} PRIVATE cxx_std_11)
-    endforeach() # IN LISTS examples
+    add_subdirectory(examples/prom)
+    add_subdirectory(examples/dmd)
     file(COPY examples/data DESTINATION ${CMAKE_BINARY_DIR}/examples)
     file(COPY examples/merlin DESTINATION ${CMAKE_BINARY_DIR}/examples)
     file(COPY examples/dmd/heat_conduction_csv.sh DESTINATION ${CMAKE_BINARY_DIR}/examples/dmd)
     file(COPY examples/dmd/heat_conduction_hdf.sh DESTINATION ${CMAKE_BINARY_DIR}/examples/dmd)
-  endif()
-
-  set(misc_example_names
-    combine_samples)
-
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/examples/misc)
-
-  foreach(name IN LISTS misc_example_names)
-    add_executable(${name} examples/misc/${name}.cpp)
-
-    target_link_libraries(${name}
-      PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
-    target_include_directories(${name}
-      PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-      ${MPI_C_INCLUDE_DIRS})
-    target_compile_features(${name} PRIVATE cxx_std_11)
-  endforeach(name) # IN LISTS misc_exmaple_names
-
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests)
-
-  if (USE_MFEM)
-    set(regression_test_names
-        basisComparator
-        checkError
-        computeSpeedup
-        solutionComparator
-        fileComparator)
-
-    foreach(name IN LISTS regression_test_names)
-      add_executable(${name} regression_tests/${name}.cpp)
-      target_link_libraries(${name}
-        PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
-      target_include_directories(${name}
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-        ${MPI_C_INCLUDE_DIRS})
-      target_compile_features(${name} PRIVATE cxx_std_11)
-    endforeach(name) # IN LISTS regression_test_names
+    add_subdirectory(regression_tests)
   endif()
 endif(ENABLE_EXAMPLES)
 

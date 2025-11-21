@@ -97,9 +97,9 @@ if (BLAS_LIBRARIES MATCHES ".*mkl.*")
   find_package(MKL COMPONENTS BLACS ScaLAPACK)
   if (NOT MKL_ScaLAPACK_FOUND)
     find_package(ScaLAPACK REQUIRED)
-    target_link_libraries(ROM PUBLIC ${ScaLAPACK_LIBRARIES})
+    target_link_libraries(ROM PUBLIC ${ScaLAPACK_LIBRARIES} ${MFEM_LIBRARIES})
   else()
-    target_link_libraries(ROM PUBLIC ${MKL_ScaLAPACK_LIBRARY} ${MKL_BLACS_LIBRARY} ${MKL_LIBRARIES})
+    target_link_libraries(ROM PUBLIC ${MKL_ScaLAPACK_LIBRARY} ${MKL_BLACS_LIBRARY} ${MKL_LIBRARIES} ${MFEM_LIBRARIES})
     target_include_directories(ROM PUBLIC ${MKL_INCLUDE_DIRS})
   endif()
 else() # BLAS or LAPACK isn't MKL
@@ -112,7 +112,7 @@ else() # BLAS or LAPACK isn't MKL
     set(ENV{PATH} "${CMAKE_SOURCE_DIR}/dependencies/scalapack-2.2.0:$ENV{PATH}")
     find_package(ScaLAPACK REQUIRED)
   endif()
-  target_link_libraries(ROM PUBLIC ${ScaLAPACK_LIBRARIES})
+  target_link_libraries(ROM PUBLIC ${ScaLAPACK_LIBRARIES} ${MFEM_LIBRARIES})
 endif()
 
 # PUBLIC dependencies are transitive; these dependencies are used in
@@ -131,7 +131,7 @@ endif()
 # 3.0.
 target_link_libraries(ROM
   PUBLIC ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran ${HDF5_LIBRARIES}
-  ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MFEM} ${HYPRE} ${PARMETIS} ${METIS}
+  ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MFEM} ${HYPRE} ${PARMETIS} ${METIS} ${MFEM_LIBRARIES}
   PRIVATE ${ZLIB_LIBRARIES} ZLIB::ZLIB)
 
 target_include_directories(ROM PUBLIC
@@ -143,6 +143,8 @@ target_include_directories(ROM PUBLIC
   ${MPI_C_INCLUDE_DIRS}
   ${MFEM_C_INCLUDE_DIRS}
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_compile_features(ROM PRIVATE cxx_std_17)
 
 # Find headers from the source file list that need to be installed
 set(HEADERS "")
