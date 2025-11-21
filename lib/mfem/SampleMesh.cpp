@@ -10,8 +10,10 @@
 
 #include "SampleMesh.hpp"
 
-using std::make_pair;
 using std::endl;
+using std::make_pair;
+using std::ofstream;
+using std::ifstream;
 
 namespace CAROM {
 
@@ -902,7 +904,7 @@ void ParaViewPrintAttributes(const string &fname,
                              const Array<int> *el_number=nullptr,
                              const Array<int> *vert_number=nullptr)
 {
-    std::ofstream out(fname + ".vtu");
+    ofstream out(fname + ".vtu");
 
     out << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\"";
     out << " byte_order=\"" << VTKByteOrder() << "\">\n";
@@ -1320,7 +1322,7 @@ void SampleMeshManager::WriteVariableSampleMap(const string variable,
         string file_name) const
 {
     const int var = GetVariableIndex(variable);
-    std::ofstream file;
+    ofstream file;
     file.open(file_name);
     for (int i=0; i<s2sp_var[var].size(); ++i)
     {
@@ -1587,13 +1589,10 @@ void SampleMeshManager::CreateSampleMesh()
     {
         sample_pmesh = new ParMesh(root_comm, *sample_mesh);
         delete sample_mesh;
-        for (int i=0; i<nspaces; ++i)
 
         // Create fespaces on sample mesh
         for (int i=0; i<nspaces; ++i)
-            spfespace[i] = new ParFiniteElementSpace(sample_pmesh,
-                    fespace[i]->GetNURBSext(),
-                    fespace[i]->FEColl(),
+            spfespace[i] = new ParFiniteElementSpace(sample_pmesh, fespace[i]->FEColl(),
                     fespace[i]->GetVDim());
     }
 
@@ -1791,7 +1790,7 @@ void SampleDOFSelector::ReadMapFromFile(const string variable, string file_name)
     vmap[variable] = nvar;
 
     vector<int> v;
-    std::ifstream file;
+    ifstream file;
     file.open(file_name);
     string line;
     while(getline(file, line)) {
