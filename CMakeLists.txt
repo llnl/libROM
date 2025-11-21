@@ -110,9 +110,28 @@ set(CAROM_HAVE_LAPACK ${LAPACK_FOUND})
 set(CAROM_HAVE_HDF5 ${HDF5_FOUND})
 
 if (USE_MFEM)
-    find_package(mfem REQUIRED NAMES MFEM HINTS "${MFEM_DIR}"
-                  "${MFEM_DIR}/lib/cmake/mfem" NO_DEFAULT_PATH)
-    message(STATUS "Found mfem config in: ${mfem_DIR} (version ${MFEM_VERSION})")
+    # Try to find MFEM installed using cmake
+    find_package(mfem NAMES MFEM HINTS "${MFEM_DIR}"
+                "${MFEM_DIR}/lib/cmake/mfem" "${CMAKE_SOURCE_DIR}/dependencies/mfem/lib/cmake/mfem" NO_DEFAULT_PATH QUIET)
+    if (mfem_FOUND)
+       message(STATUS "Found mfem config in: ${mfem_DIR} (version ${MFEM_VERSION})")
+    else()
+       # Try to find MFEM installed using configure
+       find_library(MFEM mfem HINTS "${MFEM_DIR}/lib" "${CMAKE_SOURCE_DIR}/dependencies/mfem")
+       find_library(HYPRE HYPRE HINTS "${HYPRE_DIR}/lib" "${CMAKE_SOURCE_DIR}/dependencies/hypre/src/hypre/lib")
+       find_library(PARMETIS parmetis HINTS "${PARMETIS_DIR}/lib" "${CMAKE_SOURCE_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis")
+       find_library(METIS metis HINTS "${METIS_DIR}/lib" "${CMAKE_SOURCE_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis")
+       find_path(MFEM_INCLUDES mfem.hpp HINTS "${MFEM_DIR}/include" "${CMAKE_SOURCE_DIR}/dependencies/mfem")
+       find_path(HYPRE_INCLUDES HYPRE.h HINTS "${HYPRE_DIR}/include" "${CMAKE_SOURCE_DIR}/dependencies/hypre/src/hypre/include")
+       find_path(PARMETIS_INCLUDES metis.h "${PARMETIS_DIR}/metis/include" "${CMAKE_SOURCE_DIR}/dependencies/parmetis-4.0.3/metis/include")
+
+       if (${MFEM} STREQUAL "MFEM-NOTFOUND")
+          error( "MFEM not found" )
+       else()
+          message(STATUS "MFEM library:" ${MFEM})
+          message(STATUS "MFEM includes:" ${MFEM_INCLUDES})
+       endif()
+    endif()
 endif()
 
 set(CAROM_LIBS ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
