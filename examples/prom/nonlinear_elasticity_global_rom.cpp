@@ -859,13 +859,15 @@ int main(int argc, char *argv[])
         {
             hdim = H_librom->numColumns();
         }
+        if (!hyperreduce) // Set hdim to 1 to reduce loading time for basis
+            hdim = 1;
         CAROM::Matrix *Hsinv = new CAROM::Matrix(hdim, hdim, false);
         MFEM_VERIFY(H_librom->numColumns() >= hdim, "");
 
         if (H_librom->numColumns() > hdim)
             H_librom = H_librom->getFirstNColumns(hdim);
 
-        if (myid == 0)
+        if (myid == 0 && hyperreduce)
             printf("reduced H dim = %d\n", hdim);
 
         // Setup hyperreduction, using either EQP or sampled DOFs and a sample mesh.
@@ -901,6 +903,9 @@ int main(int argc, char *argv[])
         }
         else
         {
+            if (!hyperreduce) // Enforce full size of sampling mesh (crashes otherwise)
+                num_samples_req = static_cast<int>(glob_size);
+
             vector<int> num_sample_dofs_per_proc(num_procs);
 
             if (num_samples_req != -1)

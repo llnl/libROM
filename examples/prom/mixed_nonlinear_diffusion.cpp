@@ -348,7 +348,8 @@ public:
                 const double newton_rel_tol, const double newton_abs_tol, const int newton_iter,
                 std::shared_ptr<CAROM::Matrix> S_,
                 const std::shared_ptr<CAROM::Matrix> & Ssinv_,
-                const int myid, const bool hyperreduce_source_, const bool oversampling_,
+                const int myid, const bool hyperreduce_,
+                const bool hyperreduce_source_, const bool oversampling_,
                 const bool use_eqp, const CAROM::Vector & eqpSol,
                 const CAROM::Vector & eqpSol_S, const IntegrationRule *ir_eqp_);
 
@@ -469,6 +470,7 @@ int main(int argc, char *argv[])
     bool online = false;
     const char *samplingType = "deim";
     bool use_eqp = false;
+    bool hyperreduce = true;
     bool writeSampleMesh = false;
     int num_samples_req = -1;
     bool squareSV = true;
@@ -545,6 +547,8 @@ int main(int argc, char *argv[])
                    "Number of samples for the sampling algorithm to select.");
     args.AddOption(&use_eqp, "-eqp", "--eqp", "-no-eqp", "--no-eqp",
                    "Use EQP instead of DEIM for the hyperreduction.");
+    args.AddOption(&hyperreduce, "-hyp", "--hyperreduce", "-no-hyp",
+                   "--no-hyperreduce", "Hyper reduce nonlinear term");
     args.AddOption(&writeSampleMesh, "-smesh", "--sample-mesh", "-no-smesh",
                    "--no-sample-mesh", "Write the sample mesh to file.");
     args.AddOption(&preconditionNNLS, "-preceqp", "--preceqp", "-no-preceqp",
@@ -1071,7 +1075,7 @@ int main(int argc, char *argv[])
         romop = new RomOperator(&oper, soper.get(), rrdim, rwdim, nldim, smm,
                                 BR_librom, FR_librom, BW_librom,
                                 Bsinv, newton_rel_tol, newton_abs_tol, newton_iter,
-                                S_librom, Ssinv, myid, hyperreduce_source,
+                                S_librom, Ssinv, myid, hyperreduce, hyperreduce_source,
                                 num_samples_req != -1, use_eqp, *eqpSol, *eqpSol_S, ir0);
 
         ode_solver.Init(*romop);
@@ -1653,7 +1657,8 @@ RomOperator::RomOperator(NonlinearDiffusionOperator *fom_,
                          const double newton_abs_tol, const int newton_iter,
                          std::shared_ptr<CAROM::Matrix> S_,
                          const shared_ptr<CAROM::Matrix> & Ssinv_,
-                         const int myid, const bool hyperreduce_source_,
+                         const int myid, const bool hyperreduce_,
+                         const bool hyperreduce_source_,
                          const bool oversampling_, const bool use_eqp,
                          const CAROM::Vector & eqpSol, const CAROM::Vector & eqpSol_S,
                          const IntegrationRule *ir_eqp_)
@@ -1667,7 +1672,8 @@ RomOperator::RomOperator(NonlinearDiffusionOperator *fom_,
       zN(std::max(nsamp_R, 1), false), J(height),
       zS(std::max(nsamp_S, 1), false), zT(std::max(nsamp_S, 1), false), Ssinv(Ssinv_),
       VTCS_W(rwdim, std::max(nsamp_S, 1), false), S(S_),
-      VtzR(rrdim_, false), hyperreduce_source(hyperreduce_source_),
+      VtzR(rrdim_, false), hyperreduce(hyperreduce_),
+      hyperreduce_source(hyperreduce_source_),
       oversampling(oversampling_), eqp(use_eqp),
       ir_eqp(ir_eqp_), p_gf(&(fom_->fespace_W)), rhs_gf(&(fom_->fespace_W)),
       p_coeff(&p_gf), a_coeff(&p_coeff, NonlinearCoefficient),
@@ -1744,7 +1750,6 @@ RomOperator::RomOperator(NonlinearDiffusionOperator *fom_,
         }
     }
 
-    hyperreduce = true;
     sourceFOM = false;
 
     if (!hyperreduce || sourceFOM)
@@ -1764,7 +1769,7 @@ RomOperator::RomOperator(NonlinearDiffusionOperator *fom_,
                                               true, false));
 
         zfomR.SetSize(fom->zR.Size());
-        zfomR_librom.reset(new CAROM::Vector(zfomR.GetData(), zfomR.Size(), false,
+        zfomR_librom.reset(new CAROM::Vector(zfomR.GetData(), zfomR.Size(), true,
                                              false));
 
         zfomW.SetSize(fom->zW.Size());
