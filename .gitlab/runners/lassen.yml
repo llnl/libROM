@@ -1,0 +1,30 @@
+.retry:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+
+.on_lassen:
+  extends:
+    - .retry
+  tags:
+    - lassen
+    - shell
+  rules:
+    - if: '$ON_LASSEN == "OFF"'
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+    - if: $CI_COMMIT_BRANCH == $DEFAULT_BRANCH
+    - when: on_success
+
+.job_on_lassen:
+  extends: .on_lassen
+  stage: build
+  needs: []
+  variables:
+    MPIEXEC_EXECUTABLE: jsrun
+    MPIEXEC_PREFLAGS: "-a 1 -c 1 -g 1"
+  script:
+    - bsub -q ${ALLOC_QUEUE} -W ${ALLOC_TIME} -G ${ALLOC_BANK} -J ${ALLOC_NAME} -nnodes 1 -Is ${TEST_SCRIPT}

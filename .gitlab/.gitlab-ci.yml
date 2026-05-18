@@ -1,0 +1,72 @@
+variables:
+  CUSTOM_CI_BUILDS_DIR: "/usr/workspace/$$USER/libROM_gitlab_runner"
+
+  GIT_STRATEGY: fetch
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: 1
+  GIT_SUBMODULE_DEPTH: 1
+
+  DEFAULT_BRANCH: master
+
+  ALLOC_NAME: ${CI_PROJECT_NAME}_ci_${CI_PIPELINE_ID}
+  ALLOC_QUEUE: pci
+  ALLOC_TIME: 15
+  ALLOC_BANK: asccasc
+
+  TEST_SCRIPT: .gitlab/run_tests.sh
+
+  ON_LASSEN: "OFF"
+  #ON_DANE: "OFF"
+
+stages:
+  - allocate
+  - build
+  - release
+
+workflow:
+  rules:
+    # skip running branch pipelines if a MR is open for the branch
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == 'external_pull_request_event'
+    - if: $CI_PIPELINE_SOURCE == 'web'
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+include:
+  # This include is required for LC with Gitlab 17+
+  # Refer to https://hpc.llnl.gov/technical-bulletins/bulletin-568
+  - project: 'lc-templates/id_tokens'
+    file: 'id_tokens.yml'
+  - .gitlab/runners/lassen.yml
+  - .gitlab/runners/dane.yml
+
+# Define actual CI jobs here:
+dane_gcc_12_1_1:
+  variables:
+    MODULE_LIST: cmake gcc/12.1.1
+  extends: .job_on_dane
+
+lassen_gcc_12_2_1:
+  variables:
+    MODULE_LIST: cmake/3.23.1 gcc/12.2.1
+  extends: .job_on_lassen
+
+regtest_dane_gcc_12_1_1:
+  variables:
+    MODULE_LIST: cmake gcc/12.1.1
+    LLNL_SLURM_SCHEDULER_PARAMETERS: --res=ci
+    MPIEXEC_EXECUTABLE: srun
+    MPIEXEC_PREFLAGS: "--cpu-bind=cores -v"
+  stage: allocate
+  rules:
+    #- if: $CI_PIPELINE_SOURCE == "external_pull_request_event" && $CI_COMMIT_BRANCH != $DEFAULT_BRANCH
+    #  when: manual
+    - when: manual
+    - allow_failure: true
+  tags:
+    - batch
+  extends: .on_dane
+  script:
+    - module load ${MODULE_LIST}
+    - ./regression_tests/run_regression_tests.sh

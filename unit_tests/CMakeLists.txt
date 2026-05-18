@@ -61,7 +61,9 @@ foreach(stem IN LISTS unit_test_stems)
     target_compile_features(test_${stem} PRIVATE cxx_std_11)
     target_compile_definitions(test_${stem} PRIVATE CAROM_HAS_GTEST)
 
-    add_test(NAME test_${stem} COMMAND test_${stem})
+    # serial tests
+    set(test_command sh -c "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 ${MPIEXEC_PREFLAGS} test_${stem}")
+    add_test(NAME test_${stem} COMMAND ${test_command})
 endforeach(stem)
 
 # Add parallel tests

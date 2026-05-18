@@ -1,0 +1,54 @@
+.retry:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+
+.on_dane:
+  extends:
+    - .retry
+  tags:
+    - dane
+    - shell
+  rules:
+    - if: '$ON_DANE == "OFF"'
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+    - if: $CI_COMMIT_BRANCH != $DEFAULT_BRANCH
+    - if: '$CI_JOB_NAME =~ /release_resources_dane/'
+      when: always
+    - when: on_success
+
+allocate_resources_dane:
+  variables:
+    GIT_STRATEGY: none
+  extends:
+    - .on_dane
+  stage: allocate
+  script:
+    - salloc -N 1 --reservation=ci -A ${ALLOC_BANK} --time=${ALLOC_TIME} --no-shell --job-name=${ALLOC_NAME}
+
+release_resources_dane:
+  variables:
+    GIT_STRATEGY: none
+  extends:
+    - .on_dane
+  stage: release
+  script:
+    - export JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - ([[ -n "${JOBID}" ]] && scancel ${JOBID})
+  when: always
+
+.job_on_dane:
+  extends: .on_dane
+  stage: build
+  needs: ["allocate_resources_dane"]
+  variables:
+    MPIEXEC_EXECUTABLE: srun
+    MPIEXEC_PREFLAGS: "--cpu-bind=cores -v"
+  script:
+    - echo "JOB NAME ${ALLOC_NAME}"
+    - export JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - echo "SLURM ID ${JOBID}"
+    - srun $( [[ -n "${JOBID}" ]] && echo "--jobid=${JOBID}" ) -N 1 -t ${ALLOC_TIME} -v --overlap ${TEST_SCRIPT}
